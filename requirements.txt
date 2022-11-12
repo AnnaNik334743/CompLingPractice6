@@ -1,0 +1,13 @@
+typing
+pymystem3==0.1.10
+razdel
+navec
+pandas==1.3.5
+numpy==1.23.4
+seaborn==0.11.2
+matplotlib>=3.2.2
+scikit-learn==1.0.2
+wget
+bs4
+requests==2.23.0
+streamlit
