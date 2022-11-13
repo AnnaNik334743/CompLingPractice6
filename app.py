@@ -12,5 +12,5 @@ if st.button("Отправить"):
         label = get_pred(result)
         st.success(f"Тип речи данного текста - {label.upper()}")
         st.image("images/pie.jpg")
-    except IndexError:
+    except TypeError:
         st.success('Ой, мы пока не можем определить тип речи данного текста!')

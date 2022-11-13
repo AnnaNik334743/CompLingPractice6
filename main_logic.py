@@ -43,13 +43,13 @@ s_conjs = ['и', 'да', 'a', 'но', 'тоже', 'также', 'или', 'ли�
 p_conjs = ['что', 'чтобы', 'как', 'когда', 'ибо', 'пока', 'будто', 'словно',
            'если', 'кто', 'который', 'какой', 'где', 'куда', 'откуда']
 
-punct = ['.', '!', '?', '...', '?..', '!..']
+punct = ['.', '!', '?', '...', '?..', '!..', ',', ';', ':']
 
 colnames = {el: i for i, el in enumerate(['ADVPRO', 'ANUM', 'APRO', 'ADV', 'PART',
                                           'A', 'SPRO', 'CONJ_S', 'CONJ_P', 'INTJ',
                                           'COM', 'NUM', 'PR', 'S', 'V', 'V_наст', 'V_непрош',
                                           'V_прош', 'редк', 'вводн', '.', '!', '?',
-                                          '...', '?..', '!..'])}
+                                          '...', '?..', '!..', ',', ';', ':'])}
 
 
 def text2vec(text: str = '', return_lemmatized: bool = False):
@@ -71,15 +71,18 @@ def text2vec(text: str = '', return_lemmatized: bool = False):
     word2vec_vec = np.zeros(300)
     n_word2vec = 0
     norm_text = []
+    not_known = 0
+    known = 0
 
     for item in analysis:
-        word = item['text'].lower()
+        word = item['text'].lower().replace('\n', ' ').strip()
         try:
             analysis = item['analysis'][0]
-        except KeyError:
+        except (IndexError, KeyError):
             analysis = None
 
         if analysis is not None:
+            known += 1
             word2vec_vec += navec[word] if word in navec else navec['<unk>']
             n_word2vec += 1
 
@@ -107,11 +110,19 @@ def text2vec(text: str = '', return_lemmatized: bool = False):
                     else:
                         stats_vec[colnames[tos]] += 1
                     break
+        else:
+            if word in punct:
+                stats_vec[colnames[word]] += 1
+            elif not (word.isspace() or len(word) == 0):
+                not_known += 1
 
     stats_vec /= len(stats_vec)  # нормализация векторов
     word2vec_vec = word2vec_vec / n_word2vec if n_word2vec != 0 else word2vec_vec
 
     vec = np.hstack((stats_vec, word2vec_vec))  # объединение "статистического" и "смыслового" векторов
+
+    if not_known > 0.7 * known:  # если слишком много незнакомых слов
+        raise TypeError
 
     if return_lemmatized:
         return vec, ' '.join(norm_text)
