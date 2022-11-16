@@ -11,6 +11,6 @@ if st.button("Отправить"):
     try:
         label = get_pred(result)
         st.success(f"Тип речи данного текста - {label.upper()}")
-        st.image("images/pie.jpg")
+        st.image('images/pie.jpg')
     except TypeError:
         st.success('Ой, мы пока не можем определить тип речи данного текста!')
